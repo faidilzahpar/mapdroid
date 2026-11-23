@@ -10,7 +10,7 @@
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
-# Package Files (except gradle wrapper jar if any)
+# Package Files
 *.war
 *.nar
 *.ear
@@ -22,7 +22,7 @@
 hs_err_pid*
 replay_pid*
 
-# Kotlin & Gradle
+# Kotlin & Gradle (Android)
 .kotlin/
 .gradle/
 build/
@@ -40,5 +40,15 @@ captures/
 # Output builds
 *.apk
 *.aab
+*.ipa
 dist/
 release_assets/
+android_dist/
+ios_dist/
+
+# Xcode / iOS
+ios/build/
+ios/DerivedData/
+ios/*.xcworkspace
+.build/
+*.dSYM.zip

@@ -3,8 +3,8 @@ import { setInner, onClick } from "https://cdn.jsdelivr.net/gh/jscroot/element@0
 
 const GITHUB_REPO = "faidilzahpar/mapdroid";
 const API_URL = `https://api.github.com/repos/${GITHUB_REPO}/releases/latest`;
-const FALLBACK_DIRECT_URL = `https://github.com/${GITHUB_REPO}/releases/latest/download/mapdroid-latest.apk`;
-const RELEASES_PAGE_URL = `https://github.com/${GITHUB_REPO}/releases`;
+const FALLBACK_APK_URL = `https://github.com/${GITHUB_REPO}/releases/latest/download/mapdroid-latest.apk`;
+const FALLBACK_IPA_URL = `https://github.com/${GITHUB_REPO}/releases/latest/download/mapdroid-latest.ipa`;
 
 function updateReleaseInfo(data) {
   console.log("GitHub Release Data loaded via JSCroot:", data);
@@ -13,11 +13,16 @@ function updateReleaseInfo(data) {
     // Belum ada release di github (misal action baru pertama kali dijalankan)
     setInner("release-tag", "v1.0.0");
     setInner("release-name", "MapDroid Release");
-    setInner("release-date", "Menunggu rilis GitHub Actions pertama");
-    setInner("apk-size", "Standar (~15 MB)");
-    setInner("download-subtext", "Rilis APK Otomatis • Siap Pasang");
-    const dlBtn = document.getElementById("download-btn");
-    if (dlBtn) dlBtn.href = FALLBACK_DIRECT_URL;
+    setInner("release-date", "Menunggu rilis GitHub Actions");
+    setInner("apk-size", "~15 MB");
+    setInner("ipa-size", "~25 MB");
+    setInner("download-apk-sub", "Format APK • Android");
+    setInner("download-ipa-sub", "Format IPA • iOS");
+    
+    const apkBtn = document.getElementById("download-apk-btn");
+    const ipaBtn = document.getElementById("download-ipa-btn");
+    if (apkBtn) apkBtn.href = FALLBACK_APK_URL;
+    if (ipaBtn) ipaBtn.href = FALLBACK_IPA_URL;
     return;
   }
 
@@ -38,34 +43,63 @@ function updateReleaseInfo(data) {
     setInner("release-date", `${formattedDate} WIB`);
   }
 
-  // Temukan aset APK
+  // Temukan aset APK (Android) dan IPA (iOS)
   let apkAsset = null;
+  let ipaAsset = null;
+
   if (data.assets && data.assets.length > 0) {
     apkAsset = data.assets.find(asset => asset.name.endsWith(".apk"));
+    ipaAsset = data.assets.find(asset => asset.name.endsWith(".ipa"));
   }
 
-  const downloadBtn = document.getElementById("download-btn");
-  const fallbackLink = document.getElementById("fallback-link");
-  const directLinkSpan = document.getElementById("direct-link-url");
+  const apkBtn = document.getElementById("download-apk-btn");
+  const ipaBtn = document.getElementById("download-ipa-btn");
+  const directApkLink = document.getElementById("direct-apk-link");
+  const directIpaLink = document.getElementById("direct-ipa-link");
 
+  // Update APK Info
   if (apkAsset) {
-    if (downloadBtn) downloadBtn.href = apkAsset.browser_download_url;
-    if (fallbackLink) fallbackLink.href = apkAsset.browser_download_url;
-    if (directLinkSpan) directLinkSpan.innerText = apkAsset.browser_download_url;
-
-    const sizeInMB = (apkAsset.size / (1024 * 1024)).toFixed(2);
-    setInner("apk-size", `${sizeInMB} MB`);
-    setInner("download-subtext", `Versi ${tagName} • Ukuran: ${sizeInMB} MB • Format: APK`);
-    setInner("apk-filename", apkAsset.name);
+    if (apkBtn) apkBtn.href = apkAsset.browser_download_url;
+    if (directApkLink) {
+      directApkLink.href = apkAsset.browser_download_url;
+      directApkLink.innerText = apkAsset.name;
+    }
+    const apkMb = (apkAsset.size / (1024 * 1024)).toFixed(1);
+    setInner("apk-size", `${apkMb} MB`);
+    setInner("download-apk-sub", `Versi ${tagName} • ${apkMb} MB`);
   } else {
     const directUrl = `https://github.com/${GITHUB_REPO}/releases/download/${tagName}/mapdroid-latest.apk`;
-    if (downloadBtn) downloadBtn.href = directUrl;
-    if (fallbackLink) fallbackLink.href = directUrl;
-    if (directLinkSpan) directLinkSpan.innerText = directUrl;
-    setInner("apk-size", "Standar APK");
-    setInner("download-subtext", `Versi ${tagName} • Langsung Unduh`);
+    if (apkBtn) apkBtn.href = directUrl;
+    if (directApkLink) {
+      directApkLink.href = directUrl;
+      directApkLink.innerText = "mapdroid-latest.apk";
+    }
+    setInner("apk-size", "APK Siap Unduh");
+    setInner("download-apk-sub", `Versi ${tagName} • APK`);
   }
 
+  // Update IPA Info
+  if (ipaAsset) {
+    if (ipaBtn) ipaBtn.href = ipaAsset.browser_download_url;
+    if (directIpaLink) {
+      directIpaLink.href = ipaAsset.browser_download_url;
+      directIpaLink.innerText = ipaAsset.name;
+    }
+    const ipaMb = (ipaAsset.size / (1024 * 1024)).toFixed(1);
+    setInner("ipa-size", `${ipaMb} MB`);
+    setInner("download-ipa-sub", `Versi ${tagName} • ${ipaMb} MB`);
+  } else {
+    const directUrl = `https://github.com/${GITHUB_REPO}/releases/download/${tagName}/mapdroid-latest.ipa`;
+    if (ipaBtn) ipaBtn.href = directUrl;
+    if (directIpaLink) {
+      directIpaLink.href = directUrl;
+      directIpaLink.innerText = "mapdroid-latest.ipa";
+    }
+    setInner("ipa-size", "IPA Siap Unduh");
+    setInner("download-ipa-sub", `Versi ${tagName} • IPA`);
+  }
+
+  // Catatan rilis jika ada
   if (data.body) {
     const notesElem = document.getElementById("release-body");
     const notesContainer = document.getElementById("release-notes-container");
@@ -83,9 +117,23 @@ try {
   console.warn("Gagal mengambil data rilis via JSCroot, menggunakan tautan default:", err);
 }
 
-// Feedback interaktif saat tombol download ditekan
-onClick("download-btn", () => {
+// Interaksi Toast saat mengunduh APK
+onClick("download-apk-btn", () => {
+  showToast("Mengunduh APK MapDroid (Android)...", "Buka file setelah unduhan selesai untuk menginstal.");
+});
+
+// Interaksi Toast saat mengunduh IPA
+onClick("download-ipa-btn", () => {
+  showToast("Mengunduh IPA MapDroid (iOS)...", "Pasang menggunakan AltStore, SideStore, atau Sideloadly.");
+});
+
+function showToast(title, subtitle) {
   const toast = document.getElementById("toast");
+  const toastTitle = document.getElementById("toast-title");
+  const toastSub = document.getElementById("toast-subtitle");
+  if (toastTitle) toastTitle.innerText = title;
+  if (toastSub) toastSub.innerText = subtitle;
+  
   if (toast) {
     toast.classList.remove("opacity-0", "translate-y-4");
     toast.classList.add("opacity-100", "translate-y-0");
@@ -94,4 +142,4 @@ onClick("download-btn", () => {
       toast.classList.add("opacity-0", "translate-y-4");
     }, 4000);
   }
-});
+}

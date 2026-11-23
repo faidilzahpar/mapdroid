@@ -1,4 +1,4 @@
-name: Build and Release MapDroid APK
+name: Build and Release MapDroid (Android & iOS)
 
 on:
   push:
@@ -12,10 +12,9 @@ permissions:
   contents: write
 
 jobs:
-  build-and-release:
-    name: Build APK and Create Release
+  build-android:
+    name: Build Android APK
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -36,43 +35,121 @@ jobs:
       - name: Build Release APK
         run: gradle assembleRelease --no-daemon --stacktrace
 
-      - name: Prepare Release Assets
-        id: prep
+      - name: Prepare Android APK Assets
         run: |
-          TAG_NAME="v1.0.${{ github.run_number }}"
-          echo "tag_name=${TAG_NAME}" >> $GITHUB_OUTPUT
-          
-          # Find the generated release APK
+          mkdir -p android_dist
           APK_FILE=$(find app/build/outputs/apk/release -name "*.apk" | head -n 1)
           if [ -z "$APK_FILE" ]; then
             echo "Error: Release APK not found!"
             exit 1
           fi
+          TAG_NAME="v1.0.${{ github.run_number }}"
+          cp "$APK_FILE" "android_dist/mapdroid-${TAG_NAME}.apk"
+          cp "$APK_FILE" "android_dist/mapdroid-latest.apk"
+
+      - name: Upload Android Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk
+          path: android_dist/*
+
+  build-ios:
+    name: Build iOS IPA
+    runs-on: macos-14
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Xcode
+        run: sudo xcode-select -s /Applications/Xcode_15.4.app || sudo xcode-select -s /Applications/Xcode.app
+
+      - name: Resolve Swift Packages
+        run: |
+          xcodebuild -resolvePackageDependencies -project ios/MapDroid.xcodeproj
+
+      - name: Build Unsigned iOS App (.app)
+        run: |
+          xcodebuild -project ios/MapDroid.xcodeproj \
+            -scheme MapDroid \
+            -configuration Release \
+            -sdk iphoneos \
+            -destination "generic/platform=iOS" \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO \
+            build
+
+      - name: Package Unsigned .app into .ipa
+        run: |
+          APP_PATH=$(find ~/Library/Developer/Xcode/DerivedData -name "MapDroid.app" -type d | grep "Release-iphoneos" | head -n 1)
+          if [ -z "$APP_PATH" ]; then
+            echo "Error: Could not find built MapDroid.app!"
+            exit 1
+          fi
+          echo "Found app at: $APP_PATH"
           
-          mkdir -p dist
-          # Copy to specific versioned name and generic latest name
-          cp "$APK_FILE" "dist/mapdroid-${TAG_NAME}.apk"
-          cp "$APK_FILE" "dist/mapdroid-latest.apk"
-          ls -la dist/
+          mkdir -p Payload
+          cp -r "$APP_PATH" Payload/
+          
+          TAG_NAME="v1.0.${{ github.run_number }}"
+          mkdir -p ios_dist
+          zip -r "ios_dist/mapdroid-${TAG_NAME}.ipa" Payload
+          cp "ios_dist/mapdroid-${TAG_NAME}.ipa" "ios_dist/mapdroid-latest.ipa"
+          rm -rf Payload
+
+      - name: Upload iOS Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ios-ipa
+          path: ios_dist/*
+
+  release:
+    name: Publish GitHub Release (Android & iOS)
+    needs: [build-android, build-ios]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Download Android Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: android-apk
+          path: release_assets
+
+      - name: Download iOS Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: ios-ipa
+          path: release_assets
+
+      - name: List Release Assets
+        run: ls -la release_assets/
 
       - name: Create GitHub Release & Auto Tag
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.prep.outputs.tag_name }}
-          name: "MapDroid ${{ steps.prep.outputs.tag_name }}"
+          tag_name: "v1.0.${{ github.run_number }}"
+          name: "MapDroid v1.0.${{ github.run_number }} (Android & iOS)"
           body: |
-            ## MapDroid Release ${{ steps.prep.outputs.tag_name }} 🗺️📱
+            ## MapDroid Release v1.0.${{ github.run_number }} 🗺️📱
             
-            Aplikasi Android Peta Berbasiskan **MapLibre Native Android SDK**.
+            Aplikasi Peta Digital Berbasiskan **MapLibre Native SDK** untuk **Android & iOS**.
             
-            ### 📥 Unduh File APK
-            - **[Unduh mapdroid-${{ steps.prep.outputs.tag_name }}.apk](https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag_name }}/mapdroid-${{ steps.prep.outputs.tag_name }}.apk)**
-            - **[Unduh mapdroid-latest.apk](https://github.com/${{ github.repository }}/releases/download/${{ steps.prep.outputs.tag_name }}/mapdroid-latest.apk)**
+            ### 🤖 Unduh untuk Android (.apk)
+            - **[Unduh mapdroid-v1.0.${{ github.run_number }}.apk](https://github.com/${{ github.repository }}/releases/download/v1.0.${{ github.run_number }}/mapdroid-v1.0.${{ github.run_number }}.apk)**
+            - **[Unduh mapdroid-latest.apk](https://github.com/${{ github.repository }}/releases/download/v1.0.${{ github.run_number }}/mapdroid-latest.apk)**
+            
+            ### 🍏 Unduh untuk iOS (.ipa)
+            - **[Unduh mapdroid-v1.0.${{ github.run_number }}.ipa](https://github.com/${{ github.repository }}/releases/download/v1.0.${{ github.run_number }}/mapdroid-v1.0.${{ github.run_number }}.ipa)**
+            - **[Unduh mapdroid-latest.ipa](https://github.com/${{ github.repository }}/releases/download/v1.0.${{ github.run_number }}/mapdroid-latest.ipa)**
             
             ---
             *Otomatis di-build dan dirilis via GitHub Actions dari commit `${{ github.sha }}`.*
           files: |
-            dist/mapdroid-*.apk
+            release_assets/mapdroid-*
           make_latest: true
           draft: false
           prerelease: false
