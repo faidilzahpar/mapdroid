@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="id" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MapDroid - Aplikasi Android Peta Berbasis MapLibre</title>
+    <meta name="description" content="MapDroid adalah aplikasi peta Android berkinerja tinggi berbasis MapLibre Native SDK. Unduh file APK rilis terbaru dan ikuti panduan instalasinya di sini.">
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brand: {
+                            50: '#eff6ff',
+                            100: '#dbeafe',
+                            500: '#3b82f6',
+                            600: '#2563eb',
+                            700: '#1d4ed8',
+                            800: '#1e40af',
+                            900: '#1e3a8a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .hero-pattern {
+            background-color: #0f172a;
+            background-image: radial-gradient(rgba(59, 130, 246, 0.15) 1px, transparent 1px), radial-gradient(rgba(59, 130, 246, 0.1) 1px, #0f172a 1px);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+        .glass-card {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 antialiased selection:bg-blue-600 selection:text-white">
+
+    <!-- Header / Navbar -->
+    <header class="sticky top-0 z-50 bg-slate-900/80 backdrop-blur-md border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="w-11 h-11 rounded-xl bg-gradient-to-tr from-blue-600 to-cyan-400 flex items-center justify-center shadow-lg shadow-blue-500/30">
+                    <i class="fa-solid fa-map-location-dot text-white text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-2xl font-bold tracking-tight bg-gradient-to-r from-white via-slate-200 to-blue-400 bg-clip-text text-transparent">MapDroid</span>
+                    <span class="block text-xs font-semibold text-blue-400 uppercase tracking-wider">MapLibre Native GIS</span>
+                </div>
+            </div>
+
+            <nav class="hidden md:flex items-center space-x-8 text-sm font-medium text-slate-300">
+                <a href="#fitur" class="hover:text-blue-400 transition-colors">Fitur</a>
+                <a href="#panduan" class="hover:text-blue-400 transition-colors">Panduan Pasang</a>
+                <a href="#rilis" class="hover:text-blue-400 transition-colors">Info Rilis</a>
+                <a href="https://github.com/faidilzahpar/mapdroid" target="_blank" rel="noopener noreferrer" class="flex items-center space-x-2 text-slate-300 hover:text-white transition-colors">
+                    <i class="fa-brands fa-github text-lg"></i>
+                    <span>Repository</span>
+                </a>
+            </nav>
+
+            <div class="flex items-center space-x-3">
+                <a href="#unduh" class="inline-flex items-center space-x-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-blue-600 to-blue-500 hover:from-blue-500 hover:to-blue-400 text-white font-semibold text-sm shadow-lg shadow-blue-600/30 hover:shadow-blue-500/40 transition-all transform hover:-translate-y-0.5">
+                    <i class="fa-solid fa-download"></i>
+                    <span>Unduh APK</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="relative hero-pattern pt-20 pb-28 overflow-hidden border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+            <div class="text-center max-w-3xl mx-auto">
+                <!-- Tag Badge loaded dynamically via croot.js -->
+                <div class="inline-flex items-center space-x-2 px-4 py-1.5 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs sm:text-sm font-semibold mb-8 animate-pulse">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+                    <span>Versi Rilis Terakhir: </span>
+                    <span id="release-tag" class="font-bold text-white">Memuat versi...</span>
+                </div>
+
+                <h1 class="text-4xl sm:text-6xl font-extrabold tracking-tight text-white leading-tight sm:leading-none mb-6">
+                    Aplikasi Peta Android <br>
+                    <span class="bg-gradient-to-r from-blue-400 via-cyan-300 to-teal-300 bg-clip-text text-transparent">Berbasiskan MapLibre</span>
+                </h1>
+
+                <p class="text-lg sm:text-xl text-slate-300 mb-10 leading-relaxed font-normal">
+                    MapDroid menghadirkan penjelajahan peta digital interaktif berkinerja tinggi, ringan, dan bebas lisensi proprietary dengan teknologi <strong>MapLibre Native Android SDK</strong>.
+                </p>
+
+                <!-- Primary Download CTA -->
+                <div id="unduh" class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-6">
+                    <a id="download-btn" href="https://github.com/faidilzahpar/mapdroid/releases/latest/download/mapdroid-latest.apk" class="w-full sm:w-auto inline-flex items-center justify-center space-x-3 px-8 py-4 rounded-2xl bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-500 hover:to-cyan-500 text-white font-bold text-lg shadow-xl shadow-blue-600/30 hover:shadow-cyan-500/40 transition-all transform hover:-translate-y-1">
+                        <i class="fa-solid fa-download text-2xl"></i>
+                        <div class="text-left">
+                            <span class="block leading-tight">Unduh APK Sekarang</span>
+                            <span id="download-subtext" class="block text-xs font-normal text-blue-100">Memuat info rilis...</span>
+                        </div>
+                    </a>
+
+                    <a href="https://github.com/faidilzahpar/mapdroid/releases" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto inline-flex items-center justify-center space-x-2 px-6 py-4 rounded-2xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-semibold text-base border border-slate-700 transition-all">
+                        <i class="fa-brands fa-github text-xl"></i>
+                        <span>Semua Rilis GitHub</span>
+                    </a>
+                </div>
+
+                <p class="text-xs text-slate-400">
+                    <i class="fa-solid fa-shield-halved text-emerald-400 mr-1"></i> File APK aman, ditandatangani, dan di-build langsung via GitHub Actions CI/CD.
+                </p>
+            </div>
+
+            <!-- Release Details Quick Card (Dynamically populated via croot.js) -->
+            <div id="rilis" class="mt-16 max-w-4xl mx-auto glass-card rounded-3xl p-6 sm:p-8 shadow-2xl">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-6 text-center divide-y sm:divide-y-0 sm:divide-x divide-slate-700/60">
+                    <div class="px-4 py-2">
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider block mb-1">Rilis / Tag</span>
+                        <div id="release-name" class="text-xl font-bold text-blue-400 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-tag text-sm"></i>
+                            <span>Memuat...</span>
+                        </div>
+                    </div>
+                    <div class="px-4 py-2">
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider block mb-1">Tanggal Rilis</span>
+                        <div id="release-date" class="text-base font-semibold text-slate-200 flex items-center justify-center gap-2">
+                            <i class="fa-regular fa-calendar-check text-sm text-cyan-400"></i>
+                            <span>Memuat...</span>
+                        </div>
+                    </div>
+                    <div class="px-4 py-2">
+                        <span class="text-xs font-medium text-slate-400 uppercase tracking-wider block mb-1">Ukuran File APK</span>
+                        <div id="apk-size" class="text-xl font-bold text-emerald-400 flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-file-zipper text-sm"></i>
+                            <span>Memuat...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Direct download link indicator -->
+                <div class="mt-6 pt-6 border-t border-slate-700/60 text-center">
+                    <p class="text-xs text-slate-400 mb-2">Tautan Unduhan Langsung Aset:</p>
+                    <a id="fallback-link" href="https://github.com/faidilzahpar/mapdroid/releases/latest/download/mapdroid-latest.apk" class="text-xs sm:text-sm font-mono text-cyan-400 hover:text-cyan-300 underline break-all">
+                        <span id="direct-link-url">https://github.com/faidilzahpar/mapdroid/releases/latest/download/mapdroid-latest.apk</span>
+                    </a>
+                </div>
+
+                <!-- Release Notes Container (Hidden by default, shown if notes exist) -->
+                <div id="release-notes-container" class="mt-6 pt-6 border-t border-slate-700/60" style="display: none;">
+                    <span class="text-xs font-semibold text-slate-400 uppercase tracking-wider block mb-2">
+                        <i class="fa-solid fa-circle-info text-blue-400 mr-1"></i> Catatan Rilis:
+                    </span>
+                    <pre id="release-body" class="bg-slate-950/60 text-slate-300 text-xs rounded-xl p-4 overflow-x-auto whitespace-pre-wrap font-mono"></pre>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Installation Guide Section -->
+    <section id="panduan" class="py-24 bg-slate-950 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-blue-500 font-bold text-sm tracking-wider uppercase mb-2 block">Petunjuk Mudah</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Panduan Pemasangan APK</h2>
+                <p class="text-slate-400 mt-4 text-base">
+                    Ikuti 4 langkah sederhana berikut untuk menginstal dan menjalankan MapDroid di perangkat Android Anda.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                <!-- Step 1 -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800 hover:border-blue-500/50 transition-all group shadow-lg">
+                    <div class="w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 text-blue-400 flex items-center justify-center text-2xl font-black mb-6 group-hover:scale-110 transition-transform">
+                        1
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Unduh File APK</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Klik tombol <strong>"Unduh APK Sekarang"</strong> di halaman ini. File paket installer Android (<code class="text-cyan-400">.apk</code>) akan tersimpan di ponsel Anda.
+                    </p>
+                </div>
+
+                <!-- Step 2 -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800 hover:border-cyan-500/50 transition-all group shadow-lg">
+                    <div class="w-14 h-14 rounded-2xl bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 flex items-center justify-center text-2xl font-black mb-6 group-hover:scale-110 transition-transform">
+                        2
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Izinkan Sumber Luar</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Jika muncul peringatan keamanan, buka <strong>Pengaturan &gt; Keamanan / Privasi &gt; Pasang Aplikasi Tidak Dikenal</strong>, lalu aktifkan izin untuk browser/file manager Anda.
+                    </p>
+                </div>
+
+                <!-- Step 3 -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800 hover:border-teal-500/50 transition-all group shadow-lg">
+                    <div class="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/20 text-teal-400 flex items-center justify-center text-2xl font-black mb-6 group-hover:scale-110 transition-transform">
+                        3
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Pasang (Install) APK</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Buka file <code class="text-teal-400">.apk</code> melalui bar notifikasi atau aplikasi <strong>File Manager &gt; Download</strong>, lalu ketuk tombol <strong>"Install"</strong>.
+                    </p>
+                </div>
+
+                <!-- Step 4 -->
+                <div class="bg-slate-900 rounded-3xl p-8 border border-slate-800 hover:border-emerald-500/50 transition-all group shadow-lg">
+                    <div class="w-14 h-14 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center text-2xl font-black mb-6 group-hover:scale-110 transition-transform">
+                        4
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Buka Aplikasi & Peta</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Buka aplikasi <strong>MapDroid</strong> dari app drawer Anda. Izinkan akses koneksi internet & lokasi untuk mulai menjelajahi peta digital MapLibre secara interaktif!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section id="fitur" class="py-24 bg-slate-900 border-b border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-16">
+                <span class="text-cyan-400 font-bold text-sm tracking-wider uppercase mb-2 block">Keunggulan Teknologi</span>
+                <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Fitur Utama MapDroid</h2>
+                <p class="text-slate-400 mt-4 text-base">
+                    Dibangun secara modern menggunakan arsitektur open-source untuk performa visualisasi peta terbaik.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="p-8 rounded-3xl bg-slate-800/50 border border-slate-700/60 hover:bg-slate-800 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-600/20 text-blue-400 flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">MapLibre Native Android</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Menggunakan library native C++/OpenGL dari MapLibre yang memberikan rendering peta berbasis vektor secepat kilat dengan konsumsi memori efisien.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="p-8 rounded-3xl bg-slate-800/50 border border-slate-700/60 hover:bg-slate-800 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-cyan-600/20 text-cyan-400 flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-compass"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Kontrol Kamera Interaktif</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Dilengkapi kontrol zoom in, zoom out, rotasi gesture multisentuh halus, serta tombol pintasan kembali ke wilayah kepulauan Indonesia.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="p-8 rounded-3xl bg-slate-800/50 border border-slate-700/60 hover:bg-slate-800 transition-all">
+                    <div class="w-12 h-12 rounded-2xl bg-teal-600/20 text-teal-400 flex items-center justify-center text-xl mb-6">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="text-xl font-bold text-white mb-3">Otomasi CI/CD & JSCroot</h3>
+                    <p class="text-slate-400 text-sm leading-relaxed">
+                        Rilis APK otomatis terbit setiap ada pembaruan kode melalui GitHub Actions, dan halaman ini selalu menampilkan info versi terkini menggunakan <strong>croot.js</strong>.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 py-12 text-slate-400 text-sm">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
+            <div class="flex items-center space-x-3">
+                <div class="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center text-white">
+                    <i class="fa-solid fa-map-location-dot text-sm"></i>
+                </div>
+                <span class="font-bold text-white text-base">MapDroid</span>
+                <span class="text-xs text-slate-500">| Sistem Informasi Geografis</span>
+            </div>
+
+            <div class="flex items-center space-x-6 text-xs">
+                <span>Ditenagai oleh <a href="https://maplibre.org" target="_blank" rel="noopener noreferrer" class="text-blue-400 hover:underline">MapLibre.org</a></span>
+                <span>•</span>
+                <span>Landing Page via <a href="https://github.com/jscroot" target="_blank" rel="noopener noreferrer" class="text-cyan-400 hover:underline">JSCroot (croot.js)</a></span>
+                <span>•</span>
+                <a href="https://github.com/faidilzahpar/mapdroid" target="_blank" rel="noopener noreferrer" class="text-slate-300 hover:text-white flex items-center gap-1">
+                    <i class="fa-brands fa-github"></i> GitHub
+                </a>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Toast Notification when Download button is clicked -->
+    <div id="toast" class="fixed bottom-6 right-6 z-50 transform translate-y-4 opacity-0 transition-all duration-300 pointer-events-none">
+        <div class="bg-blue-600 text-white px-5 py-3.5 rounded-2xl shadow-2xl flex items-center space-x-3">
+            <i class="fa-solid fa-circle-check text-xl text-cyan-200"></i>
+            <div>
+                <p class="font-bold text-sm">Mengunduh APK MapDroid...</p>
+                <p class="text-xs text-blue-100">Buka file setelah unduhan selesai untuk menginstal.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- JSCroot Application Module -->
+    <script type="module" src="./js/app.js"></script>
+</body>
+</html>
